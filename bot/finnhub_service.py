@@ -3,7 +3,6 @@ from models import CompanyProfile, Quote, Earning
 from settings import FINNHUB_API_KEY
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-import calendar
 
 finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
 

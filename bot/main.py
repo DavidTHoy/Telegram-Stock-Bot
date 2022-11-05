@@ -11,6 +11,15 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 
+def get_report(tick, force_next=False):
+    if force_next:
+        return FinnService.get_next_earnings(tick)
+    report = FinnService.get_recent_earnings(tick)
+    if not report:
+        get_report(tick, force_next=True)
+    return report
+
+
 def start(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Use me up.")
 
@@ -40,9 +49,7 @@ def er(update: Update, context: CallbackContext):
     for tick in context.args:
         try:
             company_obj = FinnService.get_company_profile(tick)
-            earn_report = FinnService.get_recent_earnings(tick)
-            if not earn_report:
-                earn_report = FinnService.get_next_earnings(tick)
+            earn_report = get_report(tick)
             template = TemplateService.build_template('earnings')
             formatted_text = TemplateService.format_earnings_template(template, company_obj, earn_report)
             context.bot.send_message(chat_id=update.effective_chat.id, text=formatted_text, parse_mode=ParseMode.HTML)
@@ -56,7 +63,7 @@ def ern(update: Update, context: CallbackContext):
     for tick in context.args:
         try:
             company_obj = FinnService.get_company_profile(tick)
-            earn_report = FinnService.get_next_earnings(tick)
+            earn_report = get_report(tick, force_next=True)
             template = TemplateService.build_template('earnings')
             formatted_text = TemplateService.format_earnings_template(template, company_obj, earn_report)
             context.bot.send_message(chat_id=update.effective_chat.id, text=formatted_text, parse_mode=ParseMode.HTML)
