@@ -2,7 +2,7 @@ from telegram.ext import Updater
 import logging
 from telegram import ParseMode
 from telegram import Update
-from telegram.ext import CallbackContext, CommandHandler, MessageHandler, Filters
+from telegram.ext import CallbackContext, CommandHandler
 from finnhub_service import FinnService
 from template_service import TemplateService
 from settings import TELEGRAM_API_KEY
