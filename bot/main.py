@@ -16,7 +16,7 @@ def get_report(tick, force_next=False):
         return FinnService.get_next_earnings(tick)
     report = FinnService.get_recent_earnings(tick)
     if not report:
-        get_report(tick, force_next=True)
+        return get_report(tick, force_next=True)
     return report
 
 
@@ -25,21 +25,35 @@ def start(update: Update, context: CallbackContext):
 
 
 def help(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=update.effective_chat.id, text=TemplateService.build_template('help'),
+    context.bot.send_message(chat_id=update.effective_chat.id, text=TemplateService.get_template('help'),
                              parse_mode=ParseMode.HTML)
 
 
 def ticker(update: Update, context: CallbackContext):
     for arg in context.args:
         try:
-            company_obj, quote_obj = FinnService.get_all_info(arg.upper())
+            company_obj, quote_obj = FinnService.get_ticker_quote(arg.upper())
             if not company_obj.is_real():
                 context.bot.send_message(chat_id=update.effective_chat.id, text=f"Unable to find: {arg}",
                                          parse_mode=ParseMode.HTML)
                 continue
-            template = TemplateService.build_template('quote')
-            respondingText = TemplateService.format_quote_template(template, company_obj, quote_obj)
-            context.bot.send_message(chat_id=update.effective_chat.id, text=respondingText, parse_mode=ParseMode.HTML)
+            responding_text = TemplateService.format_template(company_obj, quote_obj)
+            context.bot.send_message(chat_id=update.effective_chat.id, text=responding_text, parse_mode=ParseMode.HTML)
+        except Exception as e:
+            logger.exception(e)
+            context.bot.send_message(chat_id=update.effective_chat.id, text=f'Error retrieving information for {arg}')
+
+
+def ticker_details(update: Update, context: CallbackContext):
+    for arg in context.args:
+        try:
+            company_obj, quote_obj, reco_obj, sentiment_obj = FinnService.get_all_info(arg.upper())
+            if not company_obj.is_real():
+                context.bot.send_message(chat_id=update.effective_chat.id, text=f"Unable to find: {arg}",
+                                         parse_mode=ParseMode.HTML)
+                continue
+            responding_text = TemplateService.format_template(company_obj, quote_obj, reco_obj, sentiment_obj)
+            context.bot.send_message(chat_id=update.effective_chat.id, text=responding_text, parse_mode=ParseMode.HTML)
         except Exception as e:
             logger.exception(e)
             context.bot.send_message(chat_id=update.effective_chat.id, text=f'Error retrieving information for {arg}')
@@ -50,8 +64,7 @@ def er(update: Update, context: CallbackContext):
         try:
             company_obj = FinnService.get_company_profile(tick)
             earn_report = get_report(tick)
-            template = TemplateService.build_template('earnings')
-            formatted_text = TemplateService.format_earnings_template(template, company_obj, earn_report)
+            formatted_text = TemplateService.format_template(company_obj, earn_report)
             context.bot.send_message(chat_id=update.effective_chat.id, text=formatted_text, parse_mode=ParseMode.HTML)
         except Exception as e:
             logger.exception(e)
@@ -64,8 +77,7 @@ def ern(update: Update, context: CallbackContext):
         try:
             company_obj = FinnService.get_company_profile(tick)
             earn_report = get_report(tick, force_next=True)
-            template = TemplateService.build_template('earnings')
-            formatted_text = TemplateService.format_earnings_template(template, company_obj, earn_report)
+            formatted_text = TemplateService.format_template(company_obj, earn_report)
             context.bot.send_message(chat_id=update.effective_chat.id, text=formatted_text, parse_mode=ParseMode.HTML)
         except Exception as e:
             logger.exception(e)
@@ -78,6 +90,7 @@ if __name__ == '__main__':
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler('ticker', ticker, pass_args=True))
+    dispatcher.add_handler(CommandHandler('ticker_details', ticker_details, pass_args=True))
     dispatcher.add_handler(CommandHandler('help', help))
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('er', er, pass_args=True))
