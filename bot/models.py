@@ -94,13 +94,13 @@ class Sentiment:
 
     @staticmethod
     def get_readable_sentiment(val):
-        if val == 0:
+        if 0 <= val < .1 or 0 >= val >= -.1:
             return 'Neutral'
-        elif 0 < val <= 0.5:
+        elif .1 < val <= 0.5:
             return 'Positive'
         elif 0.5 < val <= 1:
             return 'Very Positive'
-        elif 0 > val > -0.5:
+        elif -.1 > val > -0.5:
             return 'Negative'
         else:
             return 'Very Negative'
