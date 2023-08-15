@@ -10,9 +10,9 @@ finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
 class FinnService:
 
     @staticmethod
-    def get_all_info(ticker) -> (CompanyProfile, Quote, Recommendation, Sentiment):
+    def get_all_info(ticker) -> (CompanyProfile, Quote, Recommendation):
         return FinnService.get_company_profile(ticker), FinnService.get_quote(ticker), FinnService.get_recommendation(
-            ticker), FinnService.get_sentiment(ticker)
+            ticker)
 
     @staticmethod
     def get_ticker_quote(ticker) -> (CompanyProfile, Quote):
