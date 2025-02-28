@@ -36,7 +36,7 @@ class TemplateService:
                 f"<b>Information pulled from:</b> {link}\n"
                 f"<b>Company:</b> {stock_data.get('longName', 'N/A')} (<code>{stock_data.get('symbol', 'N/A')}</code>)\n"
                 f"<b>Current Price:</b> ${stock_data.get('currentPrice', 'N/A')} <i>(Prev Close: ${stock_data.get('previousClose', 'N/A')})</i> "
-                f"Percent Change: {stock_data.get('regularMarketChangePercent', 0) * 100:.2f}%\n"
+                f"Percent Change: {stock_data.get('regularMarketChangePercent', 0):.2f}%\n"
                 f"<b>Sector:</b> {stock_data.get('sector', 'N/A')}, <b>Industry:</b> {stock_data.get('industry', 'N/A')}\n"
                 f"<b>Market Cap:</b> ${stock_data.get('marketCap', 0):,}\n"
                 f"<b>Day Range:</b> ${stock_data.get('dayLow', 'N/A')} - ${stock_data.get('dayHigh', 'N/A')}\n"
