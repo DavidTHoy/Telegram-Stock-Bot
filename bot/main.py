@@ -6,6 +6,8 @@ from telegram.constants import ParseMode
 from finnhub_service import FinnService
 from settings import TELEGRAM_API_KEY
 from template_service import TemplateService
+import yfinance as yf
+import traceback
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,7 +20,6 @@ def get_report(tick, force_next=False):
     if not report:
         return get_report(tick, force_next=True)
     return report
-
 
 async def help_command(update: Update, context: CallbackContext):
     await update.effective_chat.send_message(parse_mode=ParseMode.HTML, text=TemplateService.get_template('help'))
@@ -75,6 +76,14 @@ async def ern(update: Update, context: CallbackContext):
             logger.exception(e)
             await update.effective_chat.send_message(f'Error retrieving next earnings report for {tick}')
 
+async def info(update: Update, context: CallbackContext):
+    try:
+        tick = yf.Ticker(context.args[0])
+        msg = TemplateService.format_yahoo_statistics(tick)
+        await update.effective_chat.send_message(parse_mode=ParseMode.HTML, text=msg)
+    except Exception as e:
+        await update.effective_chat.send_message(f'Error: {traceback.format_exc()}')
+
 
 if __name__ == '__main__':
     application = Application.builder().token(TELEGRAM_API_KEY).build()
@@ -83,4 +92,5 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('help', help_command))
     application.add_handler(CommandHandler('er', er))
     application.add_handler(CommandHandler('ern', ern))
+    application.add_handler(CommandHandler('info', info))
     application.run_polling(allowed_updates=Update.ALL_TYPES)
